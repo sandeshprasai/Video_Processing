@@ -2,9 +2,12 @@ import bcrypt from "bcryptjs";
 import { randomUUID } from "node:crypto";
 
 import {User} from "../Domain/User.js";
+import { AuthServicePort } from "../Ports/AuthServicePort.js";
+import { UserAlreadyExists } from "../../Errors/UserAlreadyExists.js";
 
-export class AuthService {
+export class AuthService extends AuthServicePort {
   constructor(userRepositoryPort, authProviderPort) {
+    super();
     this.userRepositoryPort = userRepositoryPort;
     this.authProviderPort = authProviderPort;
   }
@@ -12,7 +15,7 @@ export class AuthService {
   async register(email, password) {
     const existingUser = await this.userRepositoryPort.findByEmail(email);
     if (existingUser) {
-      throw new Error("User Already Exists");
+      throw new UserAlreadyExists(409,"User Already Exists");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -25,7 +28,7 @@ export class AuthService {
     });
 
     const savedUser = await this.userRepositoryPort.Save(newUser);
-    const token = this.authProviderPort.generateToken({ userId: savedUser.Id });
+    const token = this.authProviderPort.generateToken({ userId: savedUser.id });
     return { user: savedUser, token };
   }
 }
