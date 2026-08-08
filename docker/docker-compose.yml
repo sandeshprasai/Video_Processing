@@ -1,0 +1,190 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: video-processing-postgres
+
+    restart: unless-stopped
+
+    env_file:
+      - ../.env
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - video-platform-network
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: redis
+
+    restart: unless-stopped
+
+    command: redis-server --appendonly yes
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis-data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+    networks:
+      - video-platform-network
+
+  minio:
+    image: minio/minio:RELEASE.2025-07-23T15-54-02Z
+    container_name: video-processing-minio
+
+    restart: unless-stopped
+
+    env_file:
+      - ../.env
+
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
+    command: server /data --console-address ":9001"
+
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+    volumes:
+      - minio-data:/data
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:9000/minio/health/live"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - video-platform-network
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-07-21T05-28-08Z
+
+    depends_on:
+      minio:
+        condition: service_healthy
+
+    env_file:
+      - ../.env
+
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      mc mb local/${MINIO_BUCKET} --ignore-existing;
+      mc anonymous set download local/${MINIO_BUCKET};
+      exit 0;
+      "
+
+    networks:
+      - video-platform-network
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+
+    container_name: api
+
+    restart: unless-stopped
+
+    env_file:
+      - ../.env
+
+    ports:
+      - "3000:3000"
+
+    volumes:
+      - ..:/app
+      - /app/node_modules
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+      minio:
+        condition: service_healthy
+
+      minio-init:
+        condition: service_completed_successfully
+
+    command: npm run dev
+
+    networks:
+      - video-platform-network
+
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+
+    container_name: worker
+
+    restart: unless-stopped
+
+    env_file:
+      - ../.env
+
+    volumes:
+      - ..:/app
+      - /app/node_modules
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+      minio:
+        condition: service_healthy
+
+      minio-init:
+        condition: service_completed_successfully
+
+    command: npm run worker
+
+    networks:
+      - video-platform-network
+
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:
+
+networks:
+  video-platform-network:
+    driver: bridge
