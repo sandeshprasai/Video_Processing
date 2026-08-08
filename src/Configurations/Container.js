@@ -5,6 +5,8 @@ import { UserRepository } from "../Adapter/Persistence/Repositories/UserReposito
 import { AuthProvider } from "../Adapter/Auth/AuthProvider.js";
 import { AuthService } from "../Core/Auth/Services/AuthService.js";
 import { AuthController } from "../Adapter/API /AuthController.js";
+import { PasswordHasherPort } from "../Core/Auth/Ports/PasswordHasherPort.js";
+import { PasswordHasher } from "../Adapter/Auth/PasswordHasher.js";
 
 export class Container {
   constructor() {
@@ -29,19 +31,22 @@ export class Container {
       env.get("jwtSecret"),
       env.get("jwtExpiresIn") || "1d",
     );
-
-    const authService = new AuthService(userRepository, authProvider);
-
-
-    const authController = new AuthController(authService)
+    const passwordHasher = new PasswordHasher();
+    const authService = new AuthService(
+      userRepository,
+      authProvider,
+      passwordHasher,
+    );
+    const authController = new AuthController(authService, passwordHasher);
 
     this.instances = {
       env,
       db,
       userRepository,
       authProvider,
+      passwordHasher,
       authService,
-      authController
+      authController,
     };
 
     return this;

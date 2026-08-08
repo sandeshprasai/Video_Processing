@@ -5,13 +5,14 @@ import { User } from "../Domain/User.js";
 import { AuthServicePort } from "../Ports/AuthServicePort.js";
 import { UserAlreadyExists } from "../../Errors/UserAlreadyExists.js";
 import { UserNotFound } from "../../Errors/UserNotFound.js";
-import e from "express";
+import { PasswordHasherPort } from "../Ports/PasswordHasherPort.js";
 
 export class AuthService extends AuthServicePort {
-  constructor(userRepositoryPort, authProviderPort) {
+  constructor(userRepositoryPort, authProviderPort, passwordHasherPort) {
     super();
     this.userRepositoryPort = userRepositoryPort;
     this.authProviderPort = authProviderPort;
+    this.passwordHasherPort = passwordHasherPort;
   }
 
   async register(email, password) {
@@ -20,7 +21,7 @@ export class AuthService extends AuthServicePort {
       throw new UserAlreadyExists(409, "User Already Exists");
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await this.passwordHasherPort.hashPassword(password);
 
     const newUser = new User({
       id: randomUUID(),
@@ -45,7 +46,10 @@ export class AuthService extends AuthServicePort {
       throw new UserNotFound(404, "User Not Found");
     }
 
-    const validPassword = await bcrypt.compare(password, existingUser.password);
+    const validPassword = await this.passwordHasherPort.verifyPassword(
+      password,
+      existingUser.password,
+    );
 
     if (!validPassword) {
       throw new UserNotFound(401, "User Not Found");

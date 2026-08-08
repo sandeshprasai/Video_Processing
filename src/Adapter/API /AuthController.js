@@ -1,9 +1,8 @@
-
 import { UserAlreadyExists } from "../../Core/Errors/UserAlreadyExists.js";
 import { UserNotFound } from "../../Core/Errors/UserNotFound.js";
 
 export class AuthController {
-  constructor(authServicePort) {
+  constructor(authServicePort , passwordHasherPort) {
     this.authServicePort = authServicePort;
   }
 
@@ -18,7 +17,13 @@ export class AuthController {
       }
 
       const result = await this.authServicePort.register(email, password);
-      return res.status(201).json({ user: result.user, token: result.token });
+      res.cookie("access-token", result.token, {
+        maxAge: 60*60*1000*24,
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+      return res.status(201).json({ user: result.user });
     } catch (error) {
       if (error instanceof UserAlreadyExists) {
         return res.status(409).json({ error: "User already exists" });
@@ -32,8 +37,13 @@ export class AuthController {
     try {
       const { email, password } = req.body;
       const result = await this.authServicePort.login(email, password);
-
-      return res.status(200).json({ user: result.user, token: result.token });
+      res.cookie("access-token", result.token, {
+        maxAge: 60*60*1000*24,
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+      return res.status(200).json({ user: result.user });
     } catch (error) {
       if (error instanceof UserNotFound) {
         return res.status(400).json({ error: "Invalid Email or Password" });
