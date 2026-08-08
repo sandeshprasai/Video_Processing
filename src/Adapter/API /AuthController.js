@@ -2,7 +2,7 @@ import { UserAlreadyExists } from "../../Core/Errors/UserAlreadyExists.js";
 import { UserNotFound } from "../../Core/Errors/UserNotFound.js";
 
 export class AuthController {
-  constructor(authServicePort , passwordHasherPort) {
+  constructor(authServicePort) {
     this.authServicePort = authServicePort;
   }
 
@@ -17,12 +17,7 @@ export class AuthController {
       }
 
       const result = await this.authServicePort.register(email, password);
-      res.cookie("access-token", result.token, {
-        maxAge: 60*60*1000*24,
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      });
+      this.setAccessTokenCookie(res, result.token);
       return res.status(201).json({ user: result.user });
     } catch (error) {
       if (error instanceof UserAlreadyExists) {
@@ -34,15 +29,13 @@ export class AuthController {
   }
 
   async login(req, res) {
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
     try {
       const { email, password } = req.body;
       const result = await this.authServicePort.login(email, password);
-      res.cookie("access-token", result.token, {
-        maxAge: 60*60*1000*24,
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      });
+      this.setAccessTokenCookie(res, result.token);
       return res.status(200).json({ user: result.user });
     } catch (error) {
       if (error instanceof UserNotFound) {
@@ -50,5 +43,22 @@ export class AuthController {
       }
       return res.status(500).json({ error: "Internal server error" });
     }
+  }
+  async logout(req, res) {
+    res.clearCookie("access-token", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,
+    });
+    return res.status(200).send("Logout Successfully");
+  }
+
+  setAccessTokenCookie(res, token) {
+    res.cookie("access-token", token, {
+      maxAge: 60 * 60 * 1000 * 24,
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+    });
   }
 }

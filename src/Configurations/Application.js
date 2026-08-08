@@ -26,6 +26,11 @@ export class Application {
       authController.login.bind(authController),
     );
 
+    this.app.post(
+      "/api/v1/auth/logout",
+      authController.logout.bind(authController),
+    );
+
     return this.app;
   }
 }
