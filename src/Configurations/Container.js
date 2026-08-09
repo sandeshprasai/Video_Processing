@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { UserRepository } from "../Adapter/Persistence/Repositories/UserRepository.js";
 import { AuthProvider } from "../Adapter/Auth/AuthProvider.js";
 import { AuthService } from "../Core/Auth/Services/AuthService.js";
-import { AuthController } from "../Adapter/API /AuthController.js";
+import { AuthController } from "../Adapter/API/Controller/AuthController.js";
 import { PasswordHasherPort } from "../Core/Auth/Ports/PasswordHasherPort.js";
 import { PasswordHasher } from "../Adapter/Auth/PasswordHasher.js";
 

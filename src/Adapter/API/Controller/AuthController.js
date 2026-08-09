@@ -1,5 +1,5 @@
-import { UserAlreadyExists } from "../../Core/Errors/UserAlreadyExists.js";
-import { UserNotFound } from "../../Core/Errors/UserNotFound.js";
+import { UserAlreadyExists } from "../../../Core/Errors/UserAlreadyExists.js";
+import { UserNotFound } from "../../../Core/Errors/UserNotFound.js";
 
 export class AuthController {
   constructor(authServicePort) {
