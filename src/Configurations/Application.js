@@ -1,5 +1,8 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+
+import { LoginValidator } from "../Adapter/API/Middleware/ValidateLoginInput.js";
+import { RegisterValidator } from "../Adapter/API/Middleware/RegisterValidation.js";
 export class Application {
   constructor(container) {
     this.app = express();
@@ -11,6 +14,9 @@ export class Application {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
 
+    const loginValidator = new LoginValidator();
+    const registerValidator = new RegisterValidator();
+
     const authController = this.container.get("authController");
 
     this.app.get("/health", (req, res) => {
@@ -19,10 +25,12 @@ export class Application {
 
     this.app.post(
       "/api/v1/auth/register",
+      registerValidator.validateRegisterInput,
       authController.register.bind(authController),
     );
     this.app.post(
       "/api/v1/auth/login",
+      loginValidator.validateLoginInput,
       authController.login.bind(authController),
     );
 
