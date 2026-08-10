@@ -1,0 +1,8 @@
+export const VideoStatus = Object.freeze({
+  UPLOADING: "UPLOADING",
+  UPLOADED: "UPLOADED",
+  QUEUED: "QUEUED",
+  PROCESSING: "PROCESSING",
+  COMPLETED: "COMPLETED",
+  FAILED: "FAILED",
+});

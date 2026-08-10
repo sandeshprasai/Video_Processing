@@ -3,10 +3,14 @@ import { PrismaClient } from "@prisma/client";
 
 import { UserRepository } from "../Adapter/Persistence/Repositories/UserRepository.js";
 import { AuthProvider } from "../Adapter/Auth/AuthProvider.js";
+
 import { AuthService } from "../Core/Auth/Services/AuthService.js";
 import { AuthController } from "../Adapter/API/Controller/AuthController.js";
-import { PasswordHasherPort } from "../Core/Auth/Ports/PasswordHasherPort.js";
+
 import { PasswordHasher } from "../Adapter/Auth/PasswordHasher.js";
+
+import { VideRepository } from "../Adapter/Persistence/Repositories/VideoRepository.js";
+import { VideoMapper } from "../Adapter/Persistence/Repositories/Mapper/VideoMapper.js";
 
 export class Container {
   constructor() {
@@ -26,6 +30,7 @@ export class Container {
     }
 
     const userRepository = new UserRepository(db);
+    const videoRepository = new VideRepository(db, VideoMapper);
 
     const authProvider = new AuthProvider(
       env.get("jwtSecret"),
@@ -42,7 +47,10 @@ export class Container {
     this.instances = {
       env,
       db,
+
       userRepository,
+      videoRepository,
+
       authProvider,
       passwordHasher,
       authService,
