@@ -9,7 +9,7 @@ import { AuthController } from "../Adapter/API/Controller/AuthController.js";
 
 import { PasswordHasher } from "../Adapter/Auth/PasswordHasher.js";
 
-import { VideRepository } from "../Adapter/Persistence/Repositories/VideoRepository.js";
+import { VideoRepository } from "../Adapter/Persistence/Repositories/VideoRepository.js";
 import { VideoMapper } from "../Adapter/Persistence/Repositories/Mapper/VideoMapper.js";
 
 export class Container {
@@ -30,7 +30,7 @@ export class Container {
     }
 
     const userRepository = new UserRepository(db);
-    const videoRepository = new VideRepository(db, VideoMapper);
+    const videoRepository = new VideoRepository(db, VideoMapper);
 
     const authProvider = new AuthProvider(
       env.get("jwtSecret"),

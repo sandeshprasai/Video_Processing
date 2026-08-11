@@ -1,4 +1,4 @@
-import { VideoStatus } from "../../../Commons/Constaints/VideoStatus.js";
+import { VideoStatus } from "../../../Commons/Constants/VideoStatus.js";
 
 export class Video {
   constructor({ id, userId, originalFileName, storageKey, mimeType, size }) {
@@ -9,7 +9,7 @@ export class Video {
     this.mimeType = mimeType;
     this.size = size;
     this.status = VideoStatus.UPLOADING;
-    this.dutation = null;
+    this.duration = null;
     this.createdAt = new Date();
     this.updatedAt = new Date();
   }

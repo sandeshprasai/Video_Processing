@@ -1,6 +1,6 @@
 import { VideoRepositoryPort } from "../../../Core/Video/Ports/VideoRepositoryPort.js";
 
-export class VideRepository extends VideoRepositoryPort {
+export class VideoRepository extends VideoRepositoryPort {
   constructor(prisma, videoMapper) {
     super();
     this.prisma = prisma;
@@ -9,8 +9,8 @@ export class VideRepository extends VideoRepositoryPort {
 
   async create(video) {
     const entity = this.videoMapper.toEntity(video);
-    const videoEntity = await this.prisma.video.create({ entity });
-    return this.videoMapper.toDomain(entity);
+    const videoEntity = await this.prisma.video.create({ data:entity });
+    return this.videoMapper.toDomain(videoEntity);
   }
 
   async findById(videoId) {
@@ -25,7 +25,7 @@ export class VideRepository extends VideoRepositoryPort {
   async update(video) {
     const data = this.videoMapper.toEntity(video);
     const entity = await this.prisma.video.update({
-      while: {
+      where: {
         id: video.id,
       },
       data,

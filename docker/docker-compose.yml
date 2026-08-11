@@ -30,14 +30,14 @@ services:
 
   redis:
     image: redis:7.4-alpine
-    container_name: redis
+    container_name: video-processing-redis
 
     restart: unless-stopped
 
     command: redis-server --appendonly yes
 
     ports:
-      - "6379:6379"
+      - "6380:6379"
 
     volumes:
       - redis-data:/data
@@ -146,39 +146,39 @@ services:
     networks:
       - video-platform-network
 
-  worker:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+  # worker:
+  #   build:
+  #     context: ..
+  #     dockerfile: docker/Dockerfile
 
-    container_name: worker
+  #   container_name: worker
 
-    restart: unless-stopped
+  #   restart: unless-stopped
 
-    env_file:
-      - ../.env
+  #   env_file:
+  #     - ../.env
 
-    volumes:
-      - ..:/app
-      - /app/node_modules
+  #   volumes:
+  #     - ..:/app
+  #     - /app/node_modules
 
-    depends_on:
-      postgres:
-        condition: service_healthy
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
 
-      redis:
-        condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
 
-      minio:
-        condition: service_healthy
+  #     minio:
+  #       condition: service_healthy
 
-      minio-init:
-        condition: service_completed_successfully
+  #     minio-init:
+  #       condition: service_completed_successfully
 
-    command: npm run worker
+  #   command: npm run worker
 
-    networks:
-      - video-platform-network
+  #   networks:
+  #     - video-platform-network
 
 volumes:
   postgres-data:

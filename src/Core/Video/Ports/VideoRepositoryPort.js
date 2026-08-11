@@ -1,13 +1,13 @@
 import { Video } from "../Domain/Video.js";
 
 export class VideoRepositoryPort {
-  create(Video) {
+  create(video) {
     throw new Error("Method Not Implemented");
   }
   findById(videId) {
     throw new Error("Method Not Implemented");
   }
-  update(Video) {
+  update(video) {
     throw new Error("Method Not Implemented");
   }
   delete(videId) {

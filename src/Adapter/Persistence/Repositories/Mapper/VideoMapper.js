@@ -1,25 +1,26 @@
 import { Video } from "../../../../Core/Video/Domain/Video.js";
-import { VideoEntity } from "../../Entities/VIdeoEntity.js";
+import { VideoEntity } from "../../Entities/VideoEntity.js";
 
 export class VideoMapper {
-  static toDomain(VideoEntity) {
-    if (!VideoEntity) return null;
+  static toDomain(videoEntity) {
+    if (!videoEntity) return null;
 
     return new Video({
-      id: VideoEntity.id,
-      userId: VideoEntity.userId,
-      originalFileName: VideoEntity.originalFileName,
-      storageKey: VideoEntity.storageKey,
-      mimeType: VideoEntity.mimeType,
-      size: Number(VideoEntity.size),
-      duration: VideoEntity.duration,
-      createdAt: VideoEntity.createdAt,
-      updatedAt: VideoEntity.updatedAt,
+      id: videoEntity.id,
+      userId: videoEntity.userId,
+      originalFileName: videoEntity.originalFileName,
+      storageKey: videoEntity.storageKey,
+      mimeType: videoEntity.mimeType,
+      size: Number(videoEntity.size),
+      status: videoEntity.status,
+      duration: videoEntity.duration,
+      createdAt: videoEntity.createdAt,
+      updatedAt: videoEntity.updatedAt,
     });
   }
 
-  static toEntity(Video) {
-    if (!Video) return null;
+  static toEntity(video) {
+    if (!video) return null;
 
     return new VideoEntity({
       id: video.id,
