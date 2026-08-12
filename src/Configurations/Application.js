@@ -18,6 +18,7 @@ export class Application {
     const registerValidator = new RegisterValidator();
 
     const authController = this.container.get("authController");
+    const videoRoutes = this.container.get("videoRoutes");
 
     this.app.get("/health", (req, res) => {
       res.json({ status: "Up", timestamp: new Date() });
@@ -38,6 +39,8 @@ export class Application {
       "/api/v1/auth/logout",
       authController.logout.bind(authController),
     );
+
+    this.app.use("/videos", videoRoutes.getRouter());
 
     return this.app;
   }

@@ -60,7 +60,9 @@ export class AuthService extends AuthServicePort {
       createdAt: existingUser.createdAt,
     };
 
-    const token = this.authProviderPort.generateToken(user);
+    const token = this.authProviderPort.generateToken({
+      userId: existingUser.id,
+    });
     return { user, token };
   }
 }

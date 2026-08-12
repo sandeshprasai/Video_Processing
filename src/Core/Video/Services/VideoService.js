@@ -8,21 +8,21 @@ export class VideoService {
     this.videoStoragePort = videoStoragePort;
   }
 
-  async createUploadUrl(userId, fileName, mimeType, fileSize) {
+  async createUploadUrl(userId, fileName, mimeType, size) {
     const storageKey = this.generateStorageKey(userId, fileName);
 
-    const Video = {
+    const video = {
       userId,
       originalFileName: fileName,
       mimeType,
-      fileSize,
+      size,
       storageKey,
       status: VideoStatus.UPLOADING,
     };
 
-    const savedVideo = await this.videoRepositoryPort.create(Video);
+    const savedVideo = await this.videoRepositoryPort.create(video);
 
-    const uploadUrl = this.videoStoragePort.createUploadUrl(storageKey);
+    const uploadUrl = await this.videoStoragePort.createUploadUrl(storageKey);
 
     return {
       video: savedVideo,

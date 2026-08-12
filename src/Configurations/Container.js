@@ -12,6 +12,14 @@ import { PasswordHasher } from "../Adapter/Auth/PasswordHasher.js";
 import { VideoRepository } from "../Adapter/Persistence/Repositories/VideoRepository.js";
 import { VideoMapper } from "../Adapter/Persistence/Repositories/Mapper/VideoMapper.js";
 
+import { MiniIoStorage } from "../Adapter/Storage/MiniIoStorage.js";
+import { VideoService } from "../Core/Video/Services/VideoService.js";
+import { VideoController } from "../Adapter/API/Controller/VideoController.js";
+
+import { VideoRoutes } from "../Adapter/API/Routes/VideoRoutes.js";
+
+import { AuthMiddleware } from "../Adapter/API/Middleware/AuthMiddleware.js";
+
 export class Container {
   constructor() {
     this.instances = {};
@@ -31,6 +39,9 @@ export class Container {
 
     const userRepository = new UserRepository(db);
     const videoRepository = new VideoRepository(db, VideoMapper);
+    const videoStorage = new MiniIoStorage(env);
+
+    const videoService = new VideoService(videoRepository, videoStorage);
 
     const authProvider = new AuthProvider(
       env.get("jwtSecret"),
@@ -43,6 +54,9 @@ export class Container {
       passwordHasher,
     );
     const authController = new AuthController(authService, passwordHasher);
+    const videoController = new VideoController(videoService);
+    const authMiddleware = new AuthMiddleware(authProvider);
+    const videoRoutes = new VideoRoutes(videoController, authMiddleware);
 
     this.instances = {
       env,
@@ -55,8 +69,15 @@ export class Container {
       passwordHasher,
       authService,
       authController,
-    };
+      authMiddleware,
 
+      videoStorage,
+      videoService,
+      VideoController,
+
+      videoRoutes,
+    };
+    console.log("[Container]: Video dependencies initialized");
     return this;
   }
 
