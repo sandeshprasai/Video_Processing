@@ -13,12 +13,22 @@ export class MiniIoStorage extends VideoStoragePort {
       accessKey: environment.get("minioAccessKey"),
       secretKey: environment.get("minioSecretKey"),
     });
+
+    this.presignedClient = new Client({
+      endPoint: "localhost",
+      port: Number(environment.get("minioPort")),
+      useSSL: environment.get("minioUseSSL") === true,
+      accessKey: environment.get("minioAccessKey"),
+      secretKey: environment.get("minioSecretKey"),
+      region: "us-east-1",
+    });
+
     this.bucket = environment.get("minioBucket");
   }
   async createUploadUrl(storageKey, contentType) {
-    const expiresIn = 15 * 60; // 15 minutes
+    const expiresIn = 15 * 60;
 
-    const uploadUrl = await this.client.presignedPutObject(
+    const uploadUrl = await this.presignedClient.presignedPutObject(
       this.bucket,
       storageKey,
       expiresIn,

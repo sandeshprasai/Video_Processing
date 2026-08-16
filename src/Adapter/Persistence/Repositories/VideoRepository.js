@@ -9,7 +9,7 @@ export class VideoRepository extends VideoRepositoryPort {
 
   async create(video) {
     const entity = this.videoMapper.toEntity(video);
-    const videoEntity = await this.prisma.video.create({ data:entity });
+    const videoEntity = await this.prisma.video.create({ data: entity });
     return this.videoMapper.toDomain(videoEntity);
   }
 
@@ -17,6 +17,15 @@ export class VideoRepository extends VideoRepositoryPort {
     const videoEntity = await this.prisma.video.findUnique({
       where: {
         id: videoId,
+      },
+    });
+    return this.videoMapper.toDomain(videoEntity);
+  }
+
+  async findByStorageKey(storageKey) {
+    const videoEntity = await this.prisma.video.findFirst({
+      where: {
+        storageKey: storageKey,
       },
     });
     return this.videoMapper.toDomain(videoEntity);

@@ -13,4 +13,7 @@ export class VideoRepositoryPort {
   delete(videId) {
     throw new Error("Method Not Implemented");
   }
+  findByStorageKey(storageKey) {
+    throw new Error("Method Not Implemented");
+  }
 }

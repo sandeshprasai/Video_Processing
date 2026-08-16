@@ -19,6 +19,7 @@ export class Application {
 
     const authController = this.container.get("authController");
     const videoRoutes = this.container.get("videoRoutes");
+    const videoWebHookRoutes = this.container.get("videoWebHookRoutes");
 
     this.app.get("/health", (req, res) => {
       res.json({ status: "Up", timestamp: new Date() });
@@ -41,7 +42,7 @@ export class Application {
     );
 
     this.app.use("/videos", videoRoutes.getRouter());
-
+    this.app.use("/videos", videoWebHookRoutes.getRouter());
     return this.app;
   }
 }
