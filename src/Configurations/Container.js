@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 // Routes
 import { VideoRoutes } from "../Adapter/API/Routes/VideoRoutes.js";
 import { VideoWebHookRoutes } from "../Adapter/API/Routes/VideoWebHookRoutes.js";
+import { AuthRoutes } from "../Adapter/API/Routes/AuthRoutes.js";
 
 // Controllers
 import { AuthController } from "../Adapter/API/Controller/AuthController.js";
@@ -29,6 +30,8 @@ import { PasswordHasher } from "../Adapter/Auth/PasswordHasher.js";
 
 // Storage
 import { MiniIoStorage } from "../Adapter/Storage/MiniIoStorage.js";
+import { RegisterValidator } from "../Adapter/API/Middleware/RegisterValidation.js";
+import { LoginValidator } from "../Adapter/API/Middleware/ValidateLoginInput.js";
 
 export class Container {
   constructor() {
@@ -79,6 +82,8 @@ export class Container {
     const videoWebHookService = new VideoWebHookServices(videoRepository);
 
     // Middleware
+    const registerValidator = new RegisterValidator();
+    const loginValidator = new LoginValidator();
     const authMiddleware = new AuthMiddleware(authProvider);
 
     // Controllers
@@ -91,6 +96,11 @@ export class Container {
     );
 
     // Routes
+    const authRoutes = new AuthRoutes(
+      authController,
+      registerValidator,
+      loginValidator,
+    );
     const videoRoutes = new VideoRoutes(videoController, authMiddleware);
 
     const videoWebHookRoutes = new VideoWebHookRoutes(videoWebHookController);
@@ -117,6 +127,8 @@ export class Container {
       videoWebHookService,
 
       // Middleware
+      registerValidator,
+      loginValidator,
       authMiddleware,
 
       // Controllers
@@ -127,6 +139,7 @@ export class Container {
       // Routes
       videoRoutes,
       videoWebHookRoutes,
+      authRoutes,
     };
 
     console.log("[Container]: Dependencies initialized");

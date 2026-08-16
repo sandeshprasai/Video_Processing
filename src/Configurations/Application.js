@@ -14,9 +14,7 @@ export class Application {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
 
-    const loginValidator = new LoginValidator();
-    const registerValidator = new RegisterValidator();
-
+    const authRoutes = this.container.get("authRoutes");
     const authController = this.container.get("authController");
     const videoRoutes = this.container.get("videoRoutes");
     const videoWebHookRoutes = this.container.get("videoWebHookRoutes");
@@ -24,25 +22,9 @@ export class Application {
     this.app.get("/health", (req, res) => {
       res.json({ status: "Up", timestamp: new Date() });
     });
-
-    this.app.post(
-      "/api/v1/auth/register",
-      registerValidator.validateRegisterInput,
-      authController.register.bind(authController),
-    );
-    this.app.post(
-      "/api/v1/auth/login",
-      loginValidator.validateLoginInput,
-      authController.login.bind(authController),
-    );
-
-    this.app.post(
-      "/api/v1/auth/logout",
-      authController.logout.bind(authController),
-    );
-
-    this.app.use("/videos", videoRoutes.getRouter());
-    this.app.use("/videos", videoWebHookRoutes.getRouter());
+    this.app.use("/api/v1/auth", authRoutes.getRouter());
+    this.app.use("/api/v1/videos", videoRoutes.getRouter());
+    this.app.use("/api/v1/videos", videoWebHookRoutes.getRouter());
     return this.app;
   }
 }
